@@ -18,7 +18,10 @@ padd (Point x1 y1) (Vector x2 y2) = Point (x1+x2) (y1+y2)
 ---  normalized a vector
 vnorm :: Vector -> Vector
 vnorm (Vector 0.0 0.0) = Vector 0.0 0.0
-vnorm (Vector x y) = Vector (x/vdist(Vector x y)) (y/vdist(Vector x y))
+vnorm (Vector x y) 
+      = Vector (x/vecdist) (y/vecdist)
+      where
+         vecdist = vdist(Vector x y)
 
 --- build vector from 2 points
 vector :: Point -> Point -> Vector
@@ -26,8 +29,11 @@ vector (Point x1 y1) (Point x2 y2) = Vector (x2-x1) (y2-y1)
 
 --- rotate a vector
 vrotate :: Vector -> Float -> Vector
-vrotate (Vector x1 y1) a = Vector (x1 * (cos a) - y1 * (sin a)) (x1 * (sin a) + y1 * (cos a))
-
+vrotate (Vector x1 y1) a 
+	= Vector (x1 * cosa - y1 * sina) (x1 * sina + y1 * cosa )
+	where
+	   cosa = (cos a)
+	   sina = (sin a)
 
 -- Circle utils
 
