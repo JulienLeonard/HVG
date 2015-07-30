@@ -8,6 +8,8 @@ data Vector = Vector Float Float deriving (Show)
 
 data Circle = Circle Point Float deriving (Show)
 
+data Polygon = Polygon [Point]
+
 -- Geometry utils
 
 --- length of a vector
@@ -51,7 +53,7 @@ ccenter (Circle center _) = center
 cintersects :: Circle -> Circle -> Bool
 cintersects (Circle c1 r1) (Circle c2 r2) = vdist(vector c1 c2) < (r1 + r2)
 
---- adj circle given radius and angle
-adjcircle :: Circle -> Float -> Float -> Circle
-adjcircle (Circle c1 r1) r a = Circle (padd c1 (vrotate (Vector 0.0 (r1+r)) a)) r
-
+--- compute a list of points from the circle
+circlePolygon :: Circle -> Polygon
+circlePolygon (Circle (Point x1 y1) r1) = 
+	 Polygon [padd (Point x1 y1) (vrotate (Vector 0.0 r1) ((3.14159 * 2.0) * (i / 100))) | i <- [0..99]]
