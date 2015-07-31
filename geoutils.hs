@@ -57,3 +57,6 @@ cintersects (Circle c1 r1) (Circle c2 r2) = vdist(vector c1 c2) < (r1 + r2)
 circlePolygon :: Circle -> Polygon
 circlePolygon (Circle (Point x1 y1) r1) = 
 	 Polygon [padd (Point x1 y1) (vrotate (Vector 0.0 r1) ((3.14159 * 2.0) * (i / 100))) | i <- [0..99]]
+
+--- default circle
+circle0 = Circle (Point 0 0) 1.0
