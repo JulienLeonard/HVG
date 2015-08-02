@@ -4,11 +4,19 @@ module Geoutils where
 
 data Point  = Point Float Float deriving (Show)
 
+p0 = Point 0.0 0.0
+
 data Vector = Vector Float Float deriving (Show)
+
+v0 = Vector 0.0 0.0
+vx = Vector 1.0 0.0
+vy = Vector 0.0 1.0
 
 data Circle = Circle Point Float deriving (Show)
 
-data Polygon = Polygon [Point]
+circle0 = Circle p0 1.0
+
+data Polygon = Polygon [Point] deriving (Show)
 
 -- Geometry utils
 
@@ -58,5 +66,3 @@ circlePolygon :: Circle -> Polygon
 circlePolygon (Circle (Point x1 y1) r1) = 
 	 Polygon [padd (Point x1 y1) (vrotate (Vector 0.0 r1) ((3.14159 * 2.0) * (i / 100))) | i <- [0..99]]
 
---- default circle
-circle0 = Circle (Point 0 0) 1.0

@@ -6,7 +6,7 @@ import Mathutils
 import Listutils
 
 main = do
-     writeFile "redcircles.svg" $ writePolygons [(red,(circlePolygon c)) | c <- cstring]
+     writeFile "redcircles.svg" $ svgFormat (Render (Viewport p0 1000) [(red,(circlePolygon c)) | c <- cstring])
      where 
          cstring = (circlestring (Circle (Point 100.0 500.0) 100.0) ras)
 	     where
