@@ -14,7 +14,7 @@ vy = Vector 0.0 1.0
 
 data Circle = Circle Point Float deriving (Show)
 
-circle0 = Circle p0 1.0
+c0 = Circle p0 1.0
 
 data Polygon = Polygon [Point] deriving (Show)
 
