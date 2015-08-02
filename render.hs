@@ -19,6 +19,8 @@ colorpolygons (Render _ cps) = cps
 addcolorpolygon :: Render -> (Color,Polygon) -> Render
 addcolorpolygon (Render r cps) cp = Render r (cps ++ [cp])
 
+viewportFromBBox :: BBox -> Viewport
+viewportFromBBox (BBox (Point x1 y1) (Point x2 y2)) = Viewport (Point ((x1+x2)/2.0) ((y1+y2)/2.0))  (max (x2-x1) (y2-y1))
 
 writePoint :: Point -> String 
 writePoint (Point x y) = (show x)++","++(show y)++" "
