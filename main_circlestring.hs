@@ -4,6 +4,7 @@ import Render
 import CirclePattern
 import Mathutils
 import Listutils
+import DrawUtils
 
 --- compute a circlestring with an angle offset
 patterncircles :: Circle -> Float -> [Circle]
@@ -12,6 +13,6 @@ patterncircles c offset = circlestring c ras
 	     	ras = map (\x -> ((fst x),((snd x) + offset))) (lzip2 (map ($ 100) [(geo 100.0 0.9),(samples rangeangle)]))	       
 
 main = do
-     writeFile "redcircles.svg" $ svgFormat (Render (viewportFromBBox (bboxPolygons polygons)) [(red,poly) | poly <- polygons])
+     writeFile "redcircles.svg" $ svgCircles circles red
      where 
-         polygons = map circlePolygon (concat [(patterncircles c0 offset) | offset <- (samples rangeangle 5)])
+         circles = (concat [(patterncircles c0 offset) | offset <- (samples rangeangle 5)])
