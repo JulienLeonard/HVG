@@ -54,6 +54,12 @@ vrotate (Vector x1 y1) a
 	   cosa = (cos a)
 	   sina = (sin a)
 
+--- scale a vector
+vscale :: Vector -> Float -> Vector
+vscale (Vector x y) ratio
+        = Vector (x * ratio) (y * ratio)
+
+
 -- Circle utils
 
 --- get the radius of a circle
