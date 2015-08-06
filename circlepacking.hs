@@ -2,13 +2,17 @@ module CirclePacking where
 
 import Geoutils
 
-data Seed = Seed (Circle,Circle) Float deriving (Show)
+data CirclePair = CirclePair {cpc1 :: Circle,
+                              cpc2 ::  Circle} deriving (Show)
+
+data Seed = Seed {seedcirclepair :: CirclePair,
+                  seedside :: Float} deriving (Show)
 
 --- seed factory
-circlepairs2seeds :: [(Circle,Circle)] -> [Float] -> [Seed]
+circlepairs2seeds :: [CirclePair] -> [Float] -> [Seed]
 circlepairs2seeds pairs sides = concat [ [Seed pair side | pair <- pairs] | side <- sides ]
 
-circlepair0 = ((Circle (Point 0.0 0.0) 1.0),(Circle (Point 2.0 0.0) 1.0))
+circlepair0 = CirclePair (Circle (Point 0.0 0.0) 1.0) (Circle (Point 2.0 0.0) 1.0)
 
 allsides = [-1.0,1.0]
 
@@ -16,13 +20,13 @@ seeds0 = circlepairs2seeds [circlepair0] allsides
 
 circlesfromseeds :: [Seed] -> [Circle]
 circlesfromseeds [] = []
-circlesfromseeds ((Seed (c1,c2) _ ):seeds) = [c1,c2] ++ (circlesfromseeds seeds)
+circlesfromseeds ((Seed (CirclePair c1 c2) _ ):seeds) = [c1,c2] ++ (circlesfromseeds seeds)
 
 
 --- adj circle given radius and angle
 --- TODO: add edge cases (cosv not in [-1.0,1.0] or denom == 0.0)
-circles2circle :: (Circle,Circle) -> Float -> Float -> Circle
-circles2circle ((Circle c1 r1),(Circle c2 r2)) radius side = Circle newcenter radius
+circles2circle :: CirclePair -> Float -> Float -> Circle
+circles2circle (CirclePair (Circle c1 r1) (Circle c2 r2)) radius side = Circle newcenter radius
 	       where
 	            newcenter = padd c2 vnew
 		    vnew = vscale (vnorm (vrotate s3 angle) ) l2
@@ -50,9 +54,9 @@ trimcollidings crefs (c:cs) = newcs ++ (trimcollidings (newcs ++ crefs) cs)
 circlepacking :: [Circle] -> [Seed] -> Float -> Integer -> [Circle]
 circlepacking _ [] _ _ = []
 circlepacking _ _ _ 0 = []
-circlepacking cs ((Seed (c0,c1) side):xseeds) ratio niter = newcs ++ (circlepacking (cs ++ newcs) (xseeds ++ newseeds) ratio (niter - 1))
+circlepacking cs ((Seed (CirclePair c0 c1) side):xseeds) ratio niter = newcs ++ (circlepacking (cs ++ newcs) (xseeds ++ newseeds) ratio (niter - 1))
 	      where
-	      	  newseeds = circlepairs2seeds (concat [ [(c0,newc),(c1,newc)] | newc <- newcs]) allsides
-	          newcs    = trimcollidings cs [circles2circle (c0,c1) ((cradius c0) * ratio) side] 
+	      	  newseeds = circlepairs2seeds (concat [ [(CirclePair c0 newc),(CirclePair c1 newc)] | newc <- newcs]) allsides
+	          newcs    = trimcollidings cs [circles2circle (CirclePair c0 c1) ((cradius c0) * ratio) side] 
 
 

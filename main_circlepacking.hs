@@ -9,5 +9,5 @@ import DrawUtils
 main = do
      writeFile "redcirclepacking.svg" $ svgCircles circles red
      where 
-         circles    = [(fst circlepair0),(snd circlepair0)] ++ newcircles
+         circles    = [(cpc1 circlepair0),(cpc2 circlepair0)] ++ newcircles
 	 newcircles = circlepacking (circlesfromseeds seeds0) seeds0 0.9 1000

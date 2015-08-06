@@ -23,7 +23,7 @@ data Polygon = Polygon {ppoints :: [Point]} deriving (Show)
 
 -- in the form of (Point xmin ymin) (Point xmax ymax)
 data BBox = BBox { bbpmin :: Point,
-                   bbpmax :: Point} deriving (Show)
+                   bbpmax :: Point } deriving (Show)
 
 -- Geometry utils
 
