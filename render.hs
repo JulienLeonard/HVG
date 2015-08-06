@@ -25,8 +25,16 @@ viewportFromBBox (BBox (Point x1 y1) (Point x2 y2)) = Viewport (Point ((x1+x2)/2
 writePoint :: Point -> String 
 writePoint (Point x y) = (show x)++","++(show y)++" "
 
+svgStyleFillColor :: Color -> String
+svgStyleFillColor color = "style=\"fill:rgb(" ++ svgrgb ++ ");fill-opacity=" ++ (show a) ++ ";stroke-width:0\""
+	     where
+	         svgrgb = color2svgrgb color
+		 a      = coloropacity color
+	     
+
 writePolygon :: (Color,Polygon) -> String 
-writePolygon ((Color r g b),(Polygon p)) = "<polygon points=\""++(concatMap writePoint p)++"\" style=\"fill:rgb("++(show r)++","++(show g)++","++(show b)++");stroke-width:0\"/>"
+writePolygon (color,(Polygon p)) = "<polygon points=\""++(concatMap writePoint p)++ "\" " ++ (svgStyleFillColor color) ++ "/>"
+
 
 writePolygons :: [(Color,Polygon)] -> String 
 writePolygons cps = (concatMap writePolygon cps)
