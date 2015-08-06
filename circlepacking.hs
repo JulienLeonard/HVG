@@ -5,16 +5,21 @@ import Geoutils
 data CirclePair = CirclePair {cpc1 :: Circle,
                               cpc2 ::  Circle} deriving (Show)
 
+data Side  = SideLeft | SideRight deriving (Enum,Show,Eq)
+
+side2float :: Side -> Float
+side2float side = if side == SideLeft then -1.0 else 1.0 
+
 data Seed = Seed {seedcirclepair :: CirclePair,
-                  seedside :: Float} deriving (Show)
+                  seedside :: Side} deriving (Show)
 
 --- seed factory
-circlepairs2seeds :: [CirclePair] -> [Float] -> [Seed]
+circlepairs2seeds :: [CirclePair] -> [Side] -> [Seed]
 circlepairs2seeds pairs sides = concat [ [Seed pair side | pair <- pairs] | side <- sides ]
 
 circlepair0 = CirclePair (Circle (Point 0.0 0.0) 1.0) (Circle (Point 2.0 0.0) 1.0)
 
-allsides = [-1.0,1.0]
+allsides = [SideLeft,SideRight]
 
 seeds0 = circlepairs2seeds [circlepair0] allsides
 
@@ -25,7 +30,7 @@ circlesfromseeds ((Seed (CirclePair c1 c2) _ ):seeds) = [c1,c2] ++ (circlesfroms
 
 --- adj circle given radius and angle
 --- TODO: add edge cases (cosv not in [-1.0,1.0] or denom == 0.0)
-circles2circle :: CirclePair -> Float -> Float -> Circle
+circles2circle :: CirclePair -> Float -> Side -> Circle
 circles2circle (CirclePair (Circle c1 r1) (Circle c2 r2)) radius side = Circle newcenter radius
 	       where
 	            newcenter = padd c2 vnew
@@ -36,7 +41,7 @@ circles2circle (CirclePair (Circle c1 r1) (Circle c2 r2)) radius side = Circle n
 		    l2  = r2 + radius
 		    denom = 2.0 * l2 * l3
 		    cosv  = (l3 * l3 - l1 * l1 + l2 * l2) / denom
-		    angle = acos( cosv ) * side
+		    angle = acos( cosv ) * (side2float side)
 
 --- circlecollidings:
 circlecollidings :: [Circle] -> Circle -> Bool

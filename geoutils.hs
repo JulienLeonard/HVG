@@ -15,7 +15,7 @@ v0x = Vector 1.0 0.0
 v0y = Vector 0.0 1.0
 
 data Circle = Circle { ccenter :: Point,
-     	      	       cradius ::  Float } deriving (Show)
+     	      	       cradius :: Float } deriving (Show)
 
 c0 = Circle p0 1.0
 
