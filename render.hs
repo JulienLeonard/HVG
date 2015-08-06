@@ -26,7 +26,7 @@ writePoint :: Point -> String
 writePoint (Point x y) = (show x)++","++(show y)++" "
 
 svgStyleFillColor :: Color -> String
-svgStyleFillColor color = "style=\"fill:rgb(" ++ svgrgb ++ ");fill-opacity=" ++ (show a) ++ ";stroke-width:0\""
+svgStyleFillColor color = "style=\"fill:rgb("++svgrgb++");fill-opacity:"++(show a)++";stroke-width:0\""
 	     where
 	         svgrgb = color2svgrgb color
 		 a      = coloropacity color
