@@ -2,24 +2,28 @@ module Geoutils where
 
 -- Geometry types
 
-data Point  = Point Float Float deriving (Show)
+data Point  = Point { px :: Float,
+                      py :: Float } deriving (Show)
 
 p0 = Point 0.0 0.0
 
-data Vector = Vector Float Float deriving (Show)
+data Vector = Vector { vx :: Float,
+     	      	       vy :: Float } deriving (Show)
 
 v0 = Vector 0.0 0.0
-vx = Vector 1.0 0.0
-vy = Vector 0.0 1.0
+v0x = Vector 1.0 0.0
+v0y = Vector 0.0 1.0
 
-data Circle = Circle Point Float deriving (Show)
+data Circle = Circle { ccenter :: Point,
+     	      	       cradius ::  Float } deriving (Show)
 
 c0 = Circle p0 1.0
 
-data Polygon = Polygon [Point] deriving (Show)
+data Polygon = Polygon {ppoints :: [Point]} deriving (Show)
 
 -- in the form of (Point xmin ymin) (Point xmax ymax)
-data BBox = BBox Point Point deriving (Show)
+data BBox = BBox { bbpmin :: Point,
+                   bbpmax :: Point} deriving (Show)
 
 -- Geometry utils
 
@@ -61,14 +65,6 @@ vscale (Vector x y) ratio
 
 
 -- Circle utils
-
---- get the radius of a circle
-cradius :: Circle -> Float
-cradius (Circle _ r) = r
-
---- get the center of a circle
-ccenter :: Circle -> Point
-ccenter (Circle center _) = center
 
 --- check if 2 circles intersects
 cintersects :: Circle -> Circle -> Bool
