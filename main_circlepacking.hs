@@ -10,4 +10,4 @@ main = do
      writeFile "redcirclepacking.svg" $ svgCircles circles red
      where 
          circles    = [(fst circlepair0),(snd circlepair0)] ++ newcircles
-	 newcircles = circlepacking (circlesfromseeds seeds0) seeds0 1000
+	 newcircles = circlepacking (circlesfromseeds seeds0) seeds0 0.9 1000

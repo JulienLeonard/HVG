@@ -6,7 +6,7 @@ data Seed = Seed (Circle,Circle) Float deriving (Show)
 
 --- seed factory
 circlepairs2seeds :: [(Circle,Circle)] -> [Float] -> [Seed]
-circlepairs2seeds pairs sides = [Seed pair side | pair <- pairs, side <- sides]
+circlepairs2seeds pairs sides = concat [ [Seed pair side | pair <- pairs] | side <- sides ]
 
 circlepair0 = ((Circle (Point 0.0 0.0) 1.0),(Circle (Point 2.0 0.0) 1.0))
 
@@ -37,7 +37,7 @@ circles2circle ((Circle c1 r1),(Circle c2 r2)) radius side = Circle newcenter ra
 --- circlecollidings:
 circlecollidings :: [Circle] -> Circle -> Bool
 circlecollidings [] _ = False
-circlecollidings (c:cs) newc = (cintersects c newc) && (circlecollidings cs newc)
+circlecollidings (c:cs) newc = (cintersects c newc) || (circlecollidings cs newc)
 
 --- trimcollidings: 
 trimcollidings :: [Circle] -> [Circle] -> [Circle]
@@ -47,12 +47,12 @@ trimcollidings crefs (c:cs) = newcs ++ (trimcollidings (newcs ++ crefs) cs)
 	           newcs = if (circlecollidings crefs c) then [] else [c]
 
 --- simple packing
-circlepacking :: [Circle] -> [Seed] -> Integer -> [Circle]
-circlepacking _ [] _ = []
-circlepacking _ _  0 = []
-circlepacking cs ((Seed (c0,c1) side):xseeds) niter = newcs ++ (circlepacking (cs ++ newcs) (xseeds ++ newseeds) (niter - 1))
+circlepacking :: [Circle] -> [Seed] -> Float -> Integer -> [Circle]
+circlepacking _ [] _ _ = []
+circlepacking _ _ _ 0 = []
+circlepacking cs ((Seed (c0,c1) side):xseeds) ratio niter = newcs ++ (circlepacking (cs ++ newcs) (xseeds ++ newseeds) ratio (niter - 1))
 	      where
 	      	  newseeds = circlepairs2seeds (concat [ [(c0,newc),(c1,newc)] | newc <- newcs]) allsides
-	          newcs    = trimcollidings cs [circles2circle (c0,c1) (cradius c0) side] 
+	          newcs    = trimcollidings cs [circles2circle (c0,c1) ((cradius c0) * ratio) side] 
 
 

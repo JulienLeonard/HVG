@@ -72,7 +72,8 @@ ccenter (Circle center _) = center
 
 --- check if 2 circles intersects
 cintersects :: Circle -> Circle -> Bool
-cintersects (Circle c1 r1) (Circle c2 r2) = vdist(vector c1 c2) < (r1 + r2)
+cintersects (Circle c1 r1) (Circle c2 r2) = vdist(vector c1 c2) - (r1 + r2) < (-0.0001 * (r1 + r1))
+
 
 --- compute a list of points from the circle
 circlePolygon :: Circle -> Polygon
