@@ -14,10 +14,20 @@ v0 = Vector 0.0 0.0
 v0x = Vector 1.0 0.0
 v0y = Vector 0.0 1.0
 
-data Circle = Circle { ccenter :: Point,
-     	      	       cradius :: Float } deriving (Show)
+data Radius = Radius Float deriving (Show)
 
-c0 = Circle p0 1.0
+radius2float :: Radius -> Float
+radius2float (Radius r) = r
+
+
+data Angle = Angle Float deriving (Show)
+angle2float :: Angle -> Float
+angle2float (Angle a) = a
+
+data Circle = Circle { ccenter :: Point,
+     	      	       cradius :: Radius } deriving (Show)
+
+c0 = Circle p0 (Radius 1.0)
 
 data Polygon = Polygon {ppoints :: [Point]} deriving (Show)
 
@@ -51,8 +61,8 @@ vector :: Point -> Point -> Vector
 vector (Point x1 y1) (Point x2 y2) = Vector (x2-x1) (y2-y1)
 
 --- rotate a vector
-vrotate :: Vector -> Float -> Vector
-vrotate (Vector x1 y1) a 
+vrotate :: Vector -> Angle -> Vector
+vrotate (Vector x1 y1) (Angle a) 
 	= Vector (x1 * cosa - y1 * sina) (x1 * sina + y1 * cosa )
 	where
 	   cosa = (cos a)
@@ -68,13 +78,13 @@ vscale (Vector x y) ratio
 
 --- check if 2 circles intersects
 cintersects :: Circle -> Circle -> Bool
-cintersects (Circle c1 r1) (Circle c2 r2) = vdist(vector c1 c2) - (r1 + r2) < (-0.0001 * (r1 + r1))
+cintersects (Circle c1 (Radius r1)) (Circle c2 (Radius r2)) = vdist(vector c1 c2) - (r1 + r2) < (-0.0001 * (r1 + r1))
 
 
 --- compute a list of points from the circle
 circlePolygon :: Circle -> Polygon
-circlePolygon (Circle (Point x1 y1) r1) = 
-	 Polygon [padd (Point x1 y1) (vrotate (Vector 0.0 r1) ((3.14159 * 2.0) * (i / 100))) | i <- [0..99]]
+circlePolygon (Circle (Point x1 y1) (Radius r1)) = 
+	 Polygon [padd (Point x1 y1) (vrotate (Vector 0.0 r1) (Angle ((pi * 2.0) * (i / 100)))) | i <- [0..99]]
 
 --- bounding box
 bboxPolygon :: Polygon -> BBox
