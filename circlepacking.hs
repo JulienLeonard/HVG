@@ -30,8 +30,8 @@ circlesfromseeds ((Seed (CirclePair c1 c2) _ ):seeds) = [c1,c2] ++ (circlesfroms
 
 --- adj circle given radius and angle
 --- TODO: add edge cases (cosv not in [-1.0,1.0] or denom == 0.0)
-circles2circle :: CirclePair -> Radius -> Side -> Circle
-circles2circle (CirclePair (Circle c1 r1) (Circle c2 r2)) radius side = Circle newcenter radius
+circles2circle :: Seed -> Radius -> Circle
+circles2circle (Seed (CirclePair (Circle c1 r1) (Circle c2 r2)) side) radius = Circle newcenter radius
 	       where
 	            newcenter = padd c2 vnew
 		    vnew = vscale (vnorm (vrotate s3 angle) ) l2
@@ -62,6 +62,6 @@ circlepacking _ _ _ 0 = []
 circlepacking cs ((Seed (CirclePair c0 c1) side):xseeds) ratio niter = newcs ++ (circlepacking (cs ++ newcs) (xseeds ++ newseeds) ratio (niter - 1))
 	      where
 	      	  newseeds = circlepairs2seeds (concat [ [(CirclePair c0 newc),(CirclePair c1 newc)] | newc <- newcs]) allsides
-	          newcs    = trimcollidings cs [circles2circle (CirclePair c0 c1) (Radius ((radius2float (cradius c0)) * ratio)) side] 
+	          newcs    = trimcollidings cs [circles2circle (Seed (CirclePair c0 c1) side) (Radius ( ( radius2float (cradius c0) ) * ratio) )] 
 
 
