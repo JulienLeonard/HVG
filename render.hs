@@ -3,21 +3,20 @@ module Render where
 import Geoutils
 import Color
 
-data Viewport = Viewport Point Float deriving (Show)
+data Viewport = Viewport {viewport_center :: Point, 
+                          viewport_size   :: Float } deriving (Show)
 
-data Render = Render Viewport [(Color,Polygon)] deriving (Show)
-
-viewport :: Render -> Viewport
-viewport (Render v _) = v
+data Render = Render {viewport :: Viewport,
+                      drawings  :: [Drawing]} deriving (Show)
 
 setviewport :: Render -> Viewport -> Render
 setviewport (Render v cps) newv = Render newv cps
 
-colorpolygons :: Render -> [(Color,Polygon)]
-colorpolygons (Render _ cps) = cps
+data Drawing = Drawing { dpolygon :: Polygon,
+                         dcolor   :: Color } deriving (Show)
 
-addcolorpolygon :: Render -> (Color,Polygon) -> Render
-addcolorpolygon (Render r cps) cp = Render r (cps ++ [cp])
+addDrawing :: Render -> Drawing -> Render
+addDrawing (Render r drawings) drawing = Render r (drawings ++ [drawing])
 
 viewportFromBBox :: BBox -> Viewport
 viewportFromBBox (BBox (Point x1 y1) (Point x2 y2)) = Viewport (Point ((x1+x2)/2.0) ((y1+y2)/2.0))  (max (x2-x1) (y2-y1))
@@ -32,16 +31,16 @@ svgStyleFillColor color = "style=\"fill:rgb("++svgrgb++");fill-opacity:"++(show 
 		 a      = coloropacity color
 	     
 
-writePolygon :: (Color,Polygon) -> String 
-writePolygon (color,(Polygon p)) = "<polygon points=\""++(concatMap writePoint p)++ "\" " ++ (svgStyleFillColor color) ++ "/>"
+writeDrawing :: Drawing -> String 
+writeDrawing (Drawing (Polygon p) color) = "<polygon points=\""++(concatMap writePoint p)++ "\" " ++ (svgStyleFillColor color) ++ "/>"
 
 
-writePolygons :: [(Color,Polygon)] -> String 
-writePolygons cps = (concatMap writePolygon cps)
+writeDrawings :: [Drawing] -> String 
+writeDrawings cps = (concatMap writeDrawing cps)
 
 svgViewport :: Viewport -> [Char]
 svgViewport (Viewport (Point xc yc) radius) = "viewBox=\"" ++ show(xc - radius) ++ " " ++ show(yc - radius) ++ " " ++ show(radius * 2.0) ++ " " ++ show(radius * 2.0) ++ "\""
 
 svgFormat :: Render -> [Char]
-svgFormat (Render v cps) = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10cm\" height=\"10cm\" " ++ (svgViewport v) ++ ">" ++ (writePolygons cps) ++ "</svg>"
+svgFormat (Render v drawings) = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10cm\" height=\"10cm\" " ++ (svgViewport v) ++ ">" ++ (writeDrawings drawings) ++ "</svg>"
 
