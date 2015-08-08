@@ -2,36 +2,58 @@ module CirclePacking where
 
 import Geoutils
 
-data CirclePair = CirclePair {cpc1 :: Circle,
-                              cpc2 ::  Circle} deriving (Show)
+--- CircleNode definition
+data CircleNode = CircleNode {nodecircle :: Circle,
+			      noderank   :: Integer,
+			      nodeprevs  :: [CircleNode]} deriving (Show)
+
+circle2circlenode :: Circle -> CircleNode
+circle2circlenode c = CircleNode c 0 []
+
+nodecircles :: [CircleNode] -> [Circle]
+nodecircles nodes = [nodecircle node | node <- nodes]
+
+--- Seed definition
+data CircleNodePair = CircleNodePair {cnode1 :: CircleNode,
+     		                      cnode2 :: CircleNode} deriving (Show)
+
+nodepairnodes :: CircleNodePair -> [CircleNode]
+nodepairnodes (CircleNodePair node1 node2) = [node1,node2]
 
 data Side  = SideLeft | SideRight deriving (Enum,Show,Eq)
 
 side2float :: Side -> Float
 side2float side = if side == SideLeft then -1.0 else 1.0 
 
-data Seed = Seed {seedcirclepair :: CirclePair,
+data Seed = Seed {seednodepair :: CircleNodePair,
                   seedside :: Side} deriving (Show)
 
 --- seed factory
-circlepairs2seeds :: [CirclePair] -> [Side] -> [Seed]
-circlepairs2seeds pairs sides = concat [ [Seed pair side | pair <- pairs] | side <- sides ]
+circlenodepairs2seeds :: [CircleNodePair] -> [Side] -> [Seed]
+circlenodepairs2seeds pairs sides = concat [ [Seed pair side | pair <- pairs] | side <- sides ]
 
-circlepair0 = CirclePair (Circle (Point 0.0 0.0) (Radius 1.0)) (Circle (Point 2.0 0.0) (Radius 1.0))
+circlenodepair0 = CircleNodePair (circle2circlenode (Circle (Point 0.0 0.0) (Radius 1.0))) (circle2circlenode (Circle (Point 2.0 0.0) (Radius 1.0)))
 
 allsides = [SideLeft,SideRight]
 
-seeds0 = circlepairs2seeds [circlepair0] allsides
+seeds0 = circlenodepairs2seeds [circlenodepair0] allsides
 
 circlesfromseeds :: [Seed] -> [Circle]
 circlesfromseeds [] = []
-circlesfromseeds ((Seed (CirclePair c1 c2) _ ):seeds) = [c1,c2] ++ (circlesfromseeds seeds)
+circlesfromseeds ((Seed (CircleNodePair (CircleNode c1 _ _) (CircleNode c2 _ _)) _):seeds) = [c1,c2] ++ (circlesfromseeds seeds)
+
+
+
+data RatioRadius = RatioRadius Float
+
+ratioradius2float :: RatioRadius -> Float
+ratioradius2float (RatioRadius ratio) = ratio
 
 
 --- adj circle given radius and angle
 --- TODO: add edge cases (cosv not in [-1.0,1.0] or denom == 0.0)
-circles2circle :: Seed -> Radius -> Circle
-circles2circle (Seed (CirclePair (Circle c1 r1) (Circle c2 r2)) side) radius = Circle newcenter radius
+circles2circle :: Circle -> Circle -> Side -> Radius -> Circle
+circles2circle (Circle c1 r1) (Circle c2 r2) side radius = Circle newcenter radius
 	       where
 	            newcenter = padd c2 vnew
 		    vnew = vscale (vnorm (vrotate s3 angle) ) l2
@@ -43,25 +65,39 @@ circles2circle (Seed (CirclePair (Circle c1 r1) (Circle c2 r2)) side) radius = C
 		    cosv  = (l3 * l3 - l1 * l1 + l2 * l2) / denom
 		    angle = Angle (acos( cosv ) * (side2float side))
 
+--- 
+seed2circlenodes :: Seed -> Radius -> CircleNode
+seed2circlenodes (Seed (CircleNodePair (CircleNode c1 rank1 prevs1) (CircleNode c2 rank2 prevs2)) side) radius = CircleNode newc ( 1 + (max rank1 rank2)) parentnodes
+		 where
+			newc        = (circles2circle c1 c2 side radius)
+			parentnodes = [(CircleNode c1 rank1 prevs1),(CircleNode c2 rank2 prevs2)]
+			
+
 --- circlecollidings:
 circlecollidings :: [Circle] -> Circle -> Bool
 circlecollidings [] _ = False
 circlecollidings (c:cs) newc = (cintersects c newc) || (circlecollidings cs newc)
 
 --- trimcollidings: 
-trimcollidings :: [Circle] -> [Circle] -> [Circle]
+trimcollidings :: [Circle] -> [CircleNode] -> [CircleNode]
 trimcollidings _ [] = []
-trimcollidings crefs (c:cs) = newcs ++ (trimcollidings (newcs ++ crefs) cs)
+trimcollidings crefs (cnode:nodes) = newnodes ++ (trimcollidings (newcs ++ crefs) nodes)
 	       where 
-	           newcs = if (circlecollidings crefs c) then [] else [c]
+	           newcs    = [nodecircle newnode | newnode <- newnodes]  
+		   newnodes = if (circlecollidings crefs (nodecircle cnode)) then [] else [cnode]
 
 --- simple packing
-circlepacking :: [Circle] -> [Seed] -> Float -> Integer -> [Circle]
+circlepacking :: [Circle] -> [Seed] -> RatioRadius -> Integer -> [CircleNode]
 circlepacking _ [] _ _ = []
 circlepacking _ _ _ 0 = []
-circlepacking cs ((Seed (CirclePair c0 c1) side):xseeds) ratio niter = newcs ++ (circlepacking (cs ++ newcs) (xseeds ++ newseeds) ratio (niter - 1))
+circlepacking colliders ((Seed (CircleNodePair n0 n1) side):xseeds) ratio niter = newnodes ++ (circlepacking newcolliders newseeds ratio (niter - 1))
 	      where
-	      	  newseeds = circlepairs2seeds (concat [ [(CirclePair c0 newc),(CirclePair c1 newc)] | newc <- newcs]) allsides
-	          newcs    = trimcollidings cs [circles2circle (Seed (CirclePair c0 c1) side) (Radius ( ( radius2float (cradius c0) ) * ratio) )] 
+	          newcolliders = (colliders ++ newcs)
+		  newseeds     = (xseeds ++ createdseeds)
+	      	  createdseeds = circlenodepairs2seeds (concat [ [(CircleNodePair n0 newnode),(CircleNodePair n1 newnode)] | newnode <- newnodes]) allsides
+		  newcs        = [nodecircle node | node <- newnodes]
+	          newnodes     = trimcollidings colliders [(seed2circlenodes cseed newradius)]
+		  newradius    = Radius (( radius2float (cradius (nodecircle n0))) * (ratioradius2float ratio))
+		  cseed        = (Seed (CircleNodePair n0 n1) side) 
 
 
