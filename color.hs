@@ -4,6 +4,7 @@ data Color = Color Float Float Float Float deriving (Show)
 
 white = (Color 1.0 1.0 1.0 1.0)
 red   = (Color 1.0 0.0 0.0 1.0)
+black = (Color 0.0 0.0 0.0 1.0)
 
 coloropacity :: Color -> Float
 coloropacity (Color _ _ _ a) = a

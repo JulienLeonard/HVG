@@ -7,7 +7,8 @@ import Listutils
 import DrawUtils
 
 main = do
-     writeFile "redcirclepacking.svg" $ svgCircleColors (zip circles (take (length circles) (repeat red)))
+     writeFile "redcirclepacking.svg" $ svgCircleColors circlecolors
      where 
-         circles    = (nodescircles (nodepairnodes circlenodepair0)) ++ newcircles
-	 newcircles = (nodescircles (circlepacking (circlesfromseeds seeds0) seeds0 (RatioRadius 0.9) 1000))
+         circlecolors = zip (nodescircles newnodes) colors
+	 colors       = [if (noderank node) `mod` 2 == 0 then red else black | node <- newnodes]
+	 newnodes     = (circlepacking (circlesfromseeds seeds0) seeds0 (RatioRadius 0.9) 1000)
