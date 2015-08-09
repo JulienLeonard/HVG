@@ -13,7 +13,7 @@ setviewport :: Render -> Viewport -> Render
 setviewport (Render v cps) newv = Render newv cps
 
 data Drawing = Drawing { dpolygon :: Polygon,
-                         dcolor   :: Color } deriving (Show)
+                         dcolor   :: RGBA } deriving (Show)
 
 addDrawing :: Render -> Drawing -> Render
 addDrawing (Render r drawings) drawing = Render r (drawings ++ [drawing])
@@ -24,11 +24,11 @@ viewportFromBBox (BBox (Point x1 y1) (Point x2 y2)) = Viewport (Point ((x1+x2)/2
 writePoint :: Point -> String 
 writePoint (Point x y) = (show x)++","++(show y)++" "
 
-svgStyleFillColor :: Color -> String
-svgStyleFillColor color = "style=\"fill:rgb("++svgrgb++");fill-opacity:"++(show a)++";stroke-width:0\""
+svgStyleFillColor :: RGBA -> String
+svgStyleFillColor rgba = "style=\"fill:rgb("++svgrgb++");fill-opacity:"++(show a)++";stroke-width:0\""
 	     where
-	         svgrgb = color2svgrgb color
-		 a      = coloropacity color
+	         svgrgb = rgba2svg rgba
+		 a      = coloropacity rgba
 	     
 
 writeDrawing :: Drawing -> String 
