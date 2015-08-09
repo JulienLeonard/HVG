@@ -48,6 +48,9 @@ circlesfromseeds :: [Seed] -> [Circle]
 circlesfromseeds [] = []
 circlesfromseeds (seed:seeds) = (seedcircles seed) ++ (circlesfromseeds seeds)
 
+circlesnodesfromseeds :: [Seed] -> [CircleNode]
+circlesnodesfromseeds [] = []
+circlesnodesfromseeds (seed:seeds) = (nodepairnodes (seednodepair seed)) ++ (circlesnodesfromseeds seeds)
 
 
 data RatioRadius = RatioRadius Float

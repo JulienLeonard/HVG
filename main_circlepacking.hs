@@ -11,4 +11,4 @@ main = do
      where 
          circlecolors = zip (nodescircles newnodes) colors
 	 colors       = [if (noderank node) `mod` 2 == 0 then red else black | node <- newnodes]
-	 newnodes     = (circlepacking (circlesfromseeds seeds0) seeds0 (RatioRadius 0.9) 1000)
+	 newnodes     = (circlesnodesfromseeds seeds0) ++ (circlepacking (circlesfromseeds seeds0) seeds0 (RatioRadius 0.9) 1000)
