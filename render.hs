@@ -42,5 +42,5 @@ svgViewport :: Viewport -> [Char]
 svgViewport (Viewport (Point xc yc) radius) = "viewBox=\"" ++ show(xc - radius) ++ " " ++ show(yc - radius) ++ " " ++ show(radius * 2.0) ++ " " ++ show(radius * 2.0) ++ "\""
 
 svgFormat :: Render -> [Char]
-svgFormat (Render v drawings) = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10cm\" height=\"10cm\" " ++ (svgViewport v) ++ ">" ++ (writeDrawings drawings) ++ "</svg>"
+svgFormat (Render v drawings) = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"50cm\" height=\"50cm\" " ++ (svgViewport v) ++ ">" ++ (writeDrawings drawings) ++ "</svg>"
 
