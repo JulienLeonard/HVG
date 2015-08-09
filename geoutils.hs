@@ -29,6 +29,12 @@ data Circle = Circle { ccenter :: Point,
 
 c0 = Circle p0 (Radius 1.0)
 
+data Side  = SideLeft | SideRight deriving (Enum,Show,Eq)
+
+side2float :: Side -> Float
+side2float side = if side == SideLeft then -1.0 else 1.0 
+
+
 data Polygon = Polygon {ppoints :: [Point]} deriving (Show)
 
 -- in the form of (Point xmin ymin) (Point xmax ymax)
@@ -80,11 +86,31 @@ vscale (Vector x y) ratio
 cintersects :: Circle -> Circle -> Bool
 cintersects (Circle c1 (Radius r1)) (Circle c2 (Radius r2)) = vdist(vector c1 c2) - (r1 + r2) < (-0.0001 * (r1 + r1))
 
+iscolliding :: [Circle] -> Circle -> Bool
+iscolliding [] _ = False
+iscolliding (c:cs) newc = (cintersects c newc) || (iscolliding cs newc)
 
 --- compute a list of points from the circle
 circlePolygon :: Circle -> Polygon
 circlePolygon (Circle (Point x1 y1) (Radius r1)) = 
 	 Polygon [padd (Point x1 y1) (vrotate (Vector 0.0 r1) (Angle ((pi * 2.0) * (i / 100)))) | i <- [0..99]]
+
+
+--- adj circle given radius and angle
+--- TODO: add edge cases (cosv not in [-1.0,1.0] or denom == 0.0)
+circles2circle :: Circle -> Circle -> Side -> Radius -> Circle
+circles2circle (Circle c1 r1) (Circle c2 r2) side radius = Circle newcenter radius
+	       where
+	            newcenter = padd c2 vnew
+		    vnew = vscale (vnorm (vrotate s3 angle) ) l2
+		    s3  = vector c2 c1
+		    l3  = vdist s3
+		    l1  = (radius2float r1) + (radius2float radius)
+		    l2  = (radius2float r2) + (radius2float radius)
+		    denom = 2.0 * l2 * l3
+		    cosv  = (l3 * l3 - l1 * l1 + l2 * l2) / denom
+		    angle = Angle (acos( cosv ) * (side2float side))
+
 
 --- bounding box
 bboxPolygon :: Polygon -> BBox

@@ -1,16 +1,16 @@
 module Collider where
 
 import Geoutils
+import CircleNode
 
-data Collider = Collider {collidercircles :: [Circle]}
+data Collider = Collider {collidernodes :: [CircleNode]}
 
-_iscolliding :: [Circle] -> Circle -> Bool
-_iscolliding [] _ = False
-_iscolliding (c:cs) newc = (cintersects c newc) || (_iscolliding cs newc)
+collidercircles :: Collider -> [Circle]
+collidercircles = nodescircles . collidernodes
 
-iscolliding :: Collider -> Circle -> Bool
-iscolliding (Collider circles) newc = _iscolliding circles newc
+isnodecolliding :: Collider -> CircleNode -> Bool
+isnodecolliding collider newnode = iscolliding (collidercircles collider) (nodecircle newnode)
 
-collider_expand :: Collider -> [Circle] -> Collider
-collider_expand (Collider oldcs) newcs = Collider (oldcs ++ newcs)
+collider_expand :: Collider -> [CircleNode] -> Collider
+collider_expand (Collider oldnodes) newnodes = Collider (oldnodes ++ newnodes)
 
