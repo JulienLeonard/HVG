@@ -38,8 +38,8 @@ hls_to_rgb (h,l,s) = ((_v m1 m2 (h + (1.0/3.0))), (_v m1 m2 h), (_v m1 m2 (h-(1.
 		m1 = (2.0 * l) - m2 
 		m2 = if (l <= 0.5) then (l * (1.0+s)) else (l + s -(l*s))
 
-hsl2rgb :: (Float,Float,Float,Float) -> Color
-hsl2rgb (h,s,l,a) = Color r g b a
+hsla2color :: (Float,Float,Float,Float) -> Color
+hsla2color (h,s,l,a) = Color r g b a
 	where
 	     (r,g,b) = hls_to_rgb (hb,l,s)
 	     hb = if (h > 1.0) then (h - 1.0) else 
