@@ -11,4 +11,6 @@ _iscolliding (c:cs) newc = (cintersects c newc) || (_iscolliding cs newc)
 iscolliding :: Collider -> Circle -> Bool
 iscolliding (Collider circles) newc = _iscolliding circles newc
 
+collider_expand :: Collider -> [Circle] -> Collider
+collider_expand (Collider oldcs) newcs = Collider (oldcs ++ newcs)
 

@@ -87,7 +87,7 @@ trimcollidings :: Collider -> [CircleNode] -> [CircleNode]
 trimcollidings _ [] = []
 trimcollidings collider (cnode:nodes) = newnodes ++ (trimcollidings newcollider nodes)
 	       where 
-	           newcollider = Collider (newcs ++ (collidercircles collider))
+	           newcollider = collider_expand collider newcs
 	           newcs       = nodescircles newnodes
 		   newnodes    = if (iscolliding collider (nodecircle cnode)) then [] else [cnode]
 
@@ -97,7 +97,7 @@ circlepacking _ [] _ _ = []
 circlepacking _ _ _ 0 = []
 circlepacking collider (cseed:xseeds) ratio niter = newnodes ++ (circlepacking newcollider newseeds ratio (niter - 1))
 	      where
-	          newcollider = (Collider ((collidercircles collider) ++ newcs))
+	          newcollider  = collider_expand collider newcs
 		  newseeds     = (xseeds ++ createdseeds)
 	      	  createdseeds = circlenodepairs2seeds (concat [ [(CircleNodePair n0 newnode),(CircleNodePair n1 newnode)] | newnode <- newnodes]) allsides
 		  newcs        = nodescircles newnodes
