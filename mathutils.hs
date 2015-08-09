@@ -13,3 +13,4 @@ samples r nsamples = [(sample r  ((fromIntegral i)/(fromIntegral  (nsamples - 1)
 geo :: Float -> Float -> Integer -> [Float]
 geo root ratio 0 = []
 geo root ratio nvalues = [root] ++ (geo (root*ratio) ratio (nvalues-1))
+
