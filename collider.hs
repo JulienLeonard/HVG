@@ -3,14 +3,14 @@ module Collider where
 import Geoutils
 import CircleNode
 
-data Collider = Collider {collidernodes :: [CircleNode]}
+data Collider a = Collider {collidernodes :: [CircleNode a]}
 
-collidercircles :: Collider -> [Circle]
+collidercircles :: Collider a -> [Circle]
 collidercircles = nodescircles . collidernodes
 
-isnodecolliding :: Collider -> CircleNode -> Bool
+isnodecolliding :: Collider a -> CircleNode a -> Bool
 isnodecolliding collider newnode = iscolliding (collidercircles collider) (nodecircle newnode)
 
-collider_expand :: Collider -> [CircleNode] -> Collider
+collider_expand :: Collider a -> [CircleNode a] -> Collider a
 collider_expand (Collider oldnodes) newnodes = Collider (oldnodes ++ newnodes)
 

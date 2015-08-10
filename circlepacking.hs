@@ -6,38 +6,38 @@ import Collider
 
 
 --- Seed definition
-data CircleNodePair = CircleNodePair {cnode1 :: CircleNode,
-     		                      cnode2 :: CircleNode} deriving (Show)
+data CircleNodePair a = CircleNodePair {cnode1 :: CircleNode a,
+     		               	        cnode2 :: CircleNode a} deriving (Show)
 
-nodepairnodes :: CircleNodePair -> [CircleNode]
+nodepairnodes :: CircleNodePair a -> [CircleNode a]
 nodepairnodes (CircleNodePair node1 node2) = [node1,node2]
 
 nodepaircircles = nodescircles . nodepairnodes
 
-data Seed = Seed {seednodepair :: CircleNodePair,
-                  seedside :: Side} deriving (Show)
+data Seed a = Seed {seednodepair :: CircleNodePair a,
+                    seedside :: Side} deriving (Show)
 
-seedcircles :: Seed -> [Circle]
+seedcircles :: Seed a -> [Circle]
 seedcircles = nodepaircircles . seednodepair
 
-seednodes :: Seed -> [CircleNode]
+seednodes :: Seed a -> [CircleNode a]
 seednodes = nodepairnodes . seednodepair
 
 --- seed factory
-circlenodepairs2seeds :: [CircleNodePair] -> [Side] -> [Seed]
+circlenodepairs2seeds :: [CircleNodePair a] -> [Side] -> [Seed a]
 circlenodepairs2seeds pairs sides = concat [ [Seed pair side | pair <- pairs] | side <- sides ]
 
-circlenodepair0 = CircleNodePair (circle2circlenode (Circle (Point 0.0 0.0) (Radius 1.0))) (circle2circlenode (Circle (Point 2.0 0.0) (Radius 1.0)))
+circlenodepair0 content = CircleNodePair (circle2circlenode (Circle (Point 0.0 0.0) (Radius 1.0)) content) (circle2circlenode (Circle (Point 2.0 0.0) (Radius 1.0)) content)
 
 allsides = [SideLeft,SideRight]
 
-seeds0 = circlenodepairs2seeds [circlenodepair0] allsides
+seeds0 content = circlenodepairs2seeds [circlenodepair0 content] allsides
 
-circlesfromseeds :: [Seed] -> [Circle]
+circlesfromseeds :: [Seed a] -> [Circle]
 circlesfromseeds [] = []
 circlesfromseeds (seed:seeds) = (seedcircles seed) ++ (circlesfromseeds seeds)
 
-circlenodesfromseeds :: [Seed] -> [CircleNode]
+circlenodesfromseeds :: [Seed a] -> [CircleNode a]
 circlenodesfromseeds [] = []
 circlenodesfromseeds (seed:seeds) = (seednodes seed) ++ (circlenodesfromseeds seeds)
 
@@ -48,14 +48,14 @@ ratioradius2float :: RatioRadius -> Float
 ratioradius2float (RatioRadius ratio) = ratio
 
 --- 
-seed2circlenodes :: Seed -> Radius -> CircleNode
-seed2circlenodes (Seed (CircleNodePair (CircleNode c1 rank1 prevs1) (CircleNode c2 rank2 prevs2)) side) radius = CircleNode newc ( 1 + (max rank1 rank2)) parentnodes
+seed2circlenodes :: Seed a -> Radius -> (a -> a -> a) -> CircleNode a
+seed2circlenodes (Seed (CircleNodePair (CircleNode c1 rank1 prevs1) (CircleNode c2 rank2 prevs2)) side) radius fnewnodecontent = CircleNode newc (fnewnodecontent rank1 rank2) parentnodes
 		 where
 			newc        = (circles2circle c1 c2 side radius)
 			parentnodes = [(CircleNode c1 rank1 prevs1),(CircleNode c2 rank2 prevs2)]
 			
 --- trimcollidings: 
-trimcollidings :: Collider -> [CircleNode] -> [CircleNode]
+trimcollidings :: Collider a -> [CircleNode a] -> [CircleNode a]
 trimcollidings _ [] = []
 trimcollidings collider (cnode:nodes) = newnodes ++ (trimcollidings newcollider nodes)
 	       where 
@@ -63,15 +63,15 @@ trimcollidings collider (cnode:nodes) = newnodes ++ (trimcollidings newcollider 
 		   newnodes    = if (isnodecolliding collider cnode) then [] else [cnode]
 
 --- simple packing
-circlepacking :: Collider -> [Seed] -> RatioRadius -> Integer -> [CircleNode]
-circlepacking _ [] _ _ = []
-circlepacking _ _ _ 0 = []
-circlepacking collider (cseed:xseeds) ratio niter = newnodes ++ (circlepacking newcollider newseeds ratio (niter - 1))
+circlepacking :: Collider a -> [Seed a] -> RatioRadius -> (a -> a -> a) -> Integer -> [CircleNode a]
+circlepacking _ [] _ _ _ = []
+circlepacking _ _  _ _ 0 = []
+circlepacking collider (cseed:xseeds) ratio fnewcontent niter = newnodes ++ (circlepacking newcollider newseeds ratio fnewcontent (niter - 1))
 	      where
 	          newcollider  = collider_expand collider newnodes
 		  newseeds     = (xseeds ++ createdseeds)
 	      	  createdseeds = circlenodepairs2seeds (concat [ [(CircleNodePair n0 newnode),(CircleNodePair n1 newnode)] | newnode <- newnodes]) allsides
-	          newnodes     = trimcollidings collider [(seed2circlenodes cseed newradius)]
+	          newnodes     = trimcollidings collider [(seed2circlenodes cseed newradius fnewcontent)]
 		  newradius    = Radius (( radius2float r0) * (ratioradius2float ratio))
 		  r0           = cradius (nodecircle n0)
 		  n0           = cnode1 (seednodepair cseed)
