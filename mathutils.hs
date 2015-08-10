@@ -4,6 +4,11 @@ data Range  = Range Float Float deriving (Show)
 
 rangeangle = Range 0.0 (2.0 * pi)
 
+range0 = Range 0.0 1.0
+
+rangevalues :: Range -> (Float,Float)
+rangevalues (Range v1 v2) = (v1,v2)
+
 sample :: Range -> Float -> Float
 sample (Range v1 v2) x = v1 + (v2 - v1) * x
 
