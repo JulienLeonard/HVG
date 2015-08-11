@@ -50,9 +50,17 @@ data RatioRadius = RatioRadius Float
 ratioradius2float :: RatioRadius -> Float
 ratioradius2float (RatioRadius ratio) = ratio
 
+---- CirclePackingContext
+---- Give global computation context to node creation, instead of parent ones
+
+data CirclePackingContext a = CirclePackingContext {contextniter   :: Int,
+                                                    contextcontent :: a}
+
+context00 a = CirclePackingContext 0 a
+
 --- 
-seed2circlenodes :: Seed a -> Radius -> ([CircleNode a] -> a) -> CircleNode a
-seed2circlenodes (Seed (CircleNodePair (CircleNode c1 rank1 prevs1) (CircleNode c2 rank2 prevs2)) side) radius fnewnodecontent = CircleNode newc (fnewnodecontent parentnodes) parentnodes
+seed2circlenodes :: Seed a -> CirclePackingContext b -> Radius -> ([CircleNode a] -> (CirclePackingContext b) -> a) -> CircleNode a
+seed2circlenodes (Seed (CircleNodePair (CircleNode c1 rank1 prevs1) (CircleNode c2 rank2 prevs2)) side) context radius fnewnodecontent = CircleNode newc (fnewnodecontent parentnodes context) parentnodes
 		 where
 			newc        = (circles2circle c1 c2 side radius)
 			parentnodes = [(CircleNode c1 rank1 prevs1),(CircleNode c2 rank2 prevs2)]
@@ -66,15 +74,16 @@ trimcollidings collider (cnode:nodes) = newnodes ++ (trimcollidings newcollider 
 		   newnodes    = if (isnodecolliding collider cnode) then [] else [cnode]
 
 --- simple packing
-circlepacking :: Collider a -> [Seed a] -> RatioRadius -> ([CircleNode a] -> a) -> Integer -> [CircleNode a]
-circlepacking _ [] _ _ _ = []
-circlepacking _ _  _ _ 0 = []
-circlepacking collider (cseed:xseeds) ratio fnewcontent niter = newnodes ++ (circlepacking newcollider newseeds ratio fnewcontent (niter - 1))
+circlepacking :: Collider a -> [Seed a] -> CirclePackingContext b -> RatioRadius -> ([CircleNode a] -> (CirclePackingContext b) -> a) -> (CirclePackingContext b -> CirclePackingContext b) -> Int -> [CircleNode a]
+circlepacking _ [] _ _ _ _ _ = []
+circlepacking _ _  _ _ _ _ 0 = []
+circlepacking collider (cseed:xseeds) context ratio fnewcontent fnewcontext niter = newnodes ++ (circlepacking newcollider newseeds newcontext ratio fnewcontent fnewcontext (niter - 1))
 	      where
 	          newcollider  = collider_expand collider newnodes
+		  newcontext   = fnewcontext (CirclePackingContext ((contextniter context) + 1) (contextcontent context))
 		  newseeds     = (xseeds ++ createdseeds)
 	      	  createdseeds = circlenodepairs2seeds (concat [ [(CircleNodePair n0 newnode),(CircleNodePair n1 newnode)] | newnode <- newnodes]) allsides
-	          newnodes     = trimcollidings collider [(seed2circlenodes cseed newradius fnewcontent)]
+	          newnodes     = trimcollidings collider [(seed2circlenodes cseed context newradius fnewcontent)]
 		  newradius    = Radius (( radius2float r0) * (ratioradius2float ratio))
 		  r0           = cradius (nodecircle n0)
 		  n0           = cnode1 (seednodepair cseed)
