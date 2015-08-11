@@ -8,11 +8,11 @@ import CircleNode
 import CirclePacking
 import Collider
 
-fnewrank :: Integer -> Integer -> Integer
-fnewrank rank1 rank2 =  1 + (max rank1 rank2)
-
 noderank :: CircleNode Integer -> Integer
 noderank node = nodecontent node
+
+fnewrank :: [CircleNode Integer] -> Integer
+fnewrank nodes =  1 + (maximum [(noderank node) | node <- nodes])
 
 main = do
      writeFile "redcirclepacking.svg" $ svgCircleColors circlecolors

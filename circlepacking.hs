@@ -28,10 +28,13 @@ circlenodepairs2seeds :: [CircleNodePair a] -> [Side] -> [Seed a]
 circlenodepairs2seeds pairs sides = concat [ [Seed pair side | pair <- pairs] | side <- sides ]
 
 circlenodepair0 content = CircleNodePair (circle2circlenode (Circle (Point 0.0 0.0) (Radius 1.0)) content) (circle2circlenode (Circle (Point 2.0 0.0) (Radius 1.0)) content)
+circlenodepair00 content1 content2 = CircleNodePair (circle2circlenode (Circle (Point 0.0 0.0) (Radius 1.0)) content1) (circle2circlenode (Circle (Point 2.0 0.0) (Radius 1.0)) content2)
+
 
 allsides = [SideLeft,SideRight]
 
 seeds0 content = circlenodepairs2seeds [circlenodepair0 content] allsides
+seeds00 content1 content2 = circlenodepairs2seeds [circlenodepair00 content1 content2] allsides
 
 circlesfromseeds :: [Seed a] -> [Circle]
 circlesfromseeds [] = []
@@ -48,8 +51,8 @@ ratioradius2float :: RatioRadius -> Float
 ratioradius2float (RatioRadius ratio) = ratio
 
 --- 
-seed2circlenodes :: Seed a -> Radius -> (a -> a -> a) -> CircleNode a
-seed2circlenodes (Seed (CircleNodePair (CircleNode c1 rank1 prevs1) (CircleNode c2 rank2 prevs2)) side) radius fnewnodecontent = CircleNode newc (fnewnodecontent rank1 rank2) parentnodes
+seed2circlenodes :: Seed a -> Radius -> ([CircleNode a] -> a) -> CircleNode a
+seed2circlenodes (Seed (CircleNodePair (CircleNode c1 rank1 prevs1) (CircleNode c2 rank2 prevs2)) side) radius fnewnodecontent = CircleNode newc (fnewnodecontent parentnodes) parentnodes
 		 where
 			newc        = (circles2circle c1 c2 side radius)
 			parentnodes = [(CircleNode c1 rank1 prevs1),(CircleNode c2 rank2 prevs2)]
@@ -63,7 +66,7 @@ trimcollidings collider (cnode:nodes) = newnodes ++ (trimcollidings newcollider 
 		   newnodes    = if (isnodecolliding collider cnode) then [] else [cnode]
 
 --- simple packing
-circlepacking :: Collider a -> [Seed a] -> RatioRadius -> (a -> a -> a) -> Integer -> [CircleNode a]
+circlepacking :: Collider a -> [Seed a] -> RatioRadius -> ([CircleNode a] -> a) -> Integer -> [CircleNode a]
 circlepacking _ [] _ _ _ = []
 circlepacking _ _  _ _ 0 = []
 circlepacking collider (cseed:xseeds) ratio fnewcontent niter = newnodes ++ (circlepacking newcollider newseeds ratio fnewcontent (niter - 1))
