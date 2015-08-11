@@ -20,6 +20,10 @@ white = (RGBA 1.0 1.0 1.0 1.0)
 red   = (RGBA 1.0 0.0 0.0 1.0)
 black = (RGBA 0.0 0.0 0.0 1.0)
 
+hue2color :: Hue -> RGBA
+hue2color hue = hsla2rgba (HSLA hue 1.0 0.5 1.0)
+
+
 coloropacity :: RGBA -> Float
 coloropacity (RGBA _ _ _ a) = a
 

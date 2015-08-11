@@ -30,10 +30,10 @@ dummy0 = 0
 main = do
      writeFile "redcirclepacking.svg" $ svgCircleColors circlecolors
      where 
-         circlecolors = [((nodecircle node),(hsla2rgba (HSLA hue 1.0 0.5 1.0)))  | (node,hue) <- (zip newnodes newhues)]
-	 newhues      = map (nodehue maxrank) newnodes
+         circlecolors = [((nodecircle node),(hue2color (nodehue maxrank node)))  | node <- newnodes]
 	 maxrank      = maximum $ map noderank newnodes
-	 newnodes     = seed0nodes ++ (circlepacking (Collider seed0nodes) rankseeds0 context0 (RatioRadius 0.9) fnewrank fnewcontext 1000)
+	 newnodes     = seed0nodes ++ (circlepacking (Collider seed0nodes) rankseeds0 context0 (RatioRadius 0.9) fnewrank fnewcontext niter)
 	 context0     = context00 dummy0
 	 seed0nodes   = circlenodesfromseeds rankseeds0
 	 rankseeds0   = seeds0 rank0
+	 niter        = 1000
