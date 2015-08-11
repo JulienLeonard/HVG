@@ -2,10 +2,19 @@ module Color where
 
 import Data.Fixed
 
+type R = Float
+type G = Float
+type B = Float
+type A = Float
 
-data RGBA = RGBA Float Float Float Float deriving (Show)
+data RGBA = RGBA R G B A deriving (Show)
 
-data HSLA = HSLA Float Float Float Float deriving (Show)
+type Hue = Float
+type Saturation = Float
+type Light = Float
+
+
+data HSLA = HSLA Hue Saturation Light A deriving (Show)
 
 white = (RGBA 1.0 1.0 1.0 1.0)
 red   = (RGBA 1.0 0.0 0.0 1.0)
