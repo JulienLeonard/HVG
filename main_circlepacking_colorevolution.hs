@@ -15,7 +15,7 @@ fnewcontent :: [CircleNode Float] -> (CirclePackingContext [Float]) -> Float
 fnewcontent nodes context =  maxhue + ((contextcontent context) !! newindex)
 	    where 
 	        maxhue   = maximum $ map nodehue nodes
-		newindex = 1 + contextniter context
+		newindex = contextniter context
 
 fnewcontext context = context
 
