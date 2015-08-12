@@ -28,8 +28,8 @@ seednodes = nodepairnodes . seednodepair
 circlenodepairs2seeds :: [CircleNodePair a] -> [Side] -> [Seed a]
 circlenodepairs2seeds pairs sides = concat [ [Seed pair side | pair <- pairs] | side <- sides ]
 
-circlenodepair0 content = CircleNodePair (circle2circlenode (Circle (Point 0.0 0.0) (Radius 1.0)) content) (circle2circlenode (Circle (Point 2.0 0.0) (Radius 1.0)) content)
-circlenodepair00 content1 content2 = CircleNodePair (circle2circlenode (Circle (Point 0.0 0.0) (Radius 1.0)) content1) (circle2circlenode (Circle (Point 2.0 0.0) (Radius 1.0)) content2)
+circlenodepair0 content = CircleNodePair (circle2circlenode (Circle (Point 0.0 0.0) 1.0) content) (circle2circlenode (Circle (Point 2.0 0.0) 1.0) content)
+circlenodepair00 content1 content2 = CircleNodePair (circle2circlenode (Circle (Point 0.0 0.0) 1.0) content1) (circle2circlenode (Circle (Point 2.0 0.0) 1.0) content2)
 
 
 allsides = [SideLeft,SideRight]
@@ -46,10 +46,8 @@ circlenodesfromseeds [] = []
 circlenodesfromseeds (seed:seeds) = (seednodes seed) ++ (circlenodesfromseeds seeds)
 
 
-data RatioRadius = RatioRadius Float
+type RatioRadius = Float
 
-ratioradius2float :: RatioRadius -> Float
-ratioradius2float (RatioRadius ratio) = ratio
 
 ---- CirclePackingContext
 ---- Give global computation context to node creation, instead of parent ones
@@ -64,7 +62,7 @@ type FNodeNewContent a b =  ([CircleNode a] -> (CirclePackingContext b) -> a)
 type FNodeNewRadius  a b =  ([CircleNode a] -> (CirclePackingContext b) -> Radius)
 
 fratioNewRadius :: RatioRadius -> [CircleNode a] -> (CirclePackingContext b) -> Radius
-fratioNewRadius ratio parentnodes _ = Radius (( radius2float r0) * (ratioradius2float ratio))
+fratioNewRadius ratio parentnodes _ = r0 * ratio
 	       where
 			r0 = noderadius $ parentnodes !! 0
 

@@ -2,32 +2,28 @@ module Geoutils where
 
 -- Geometry types
 
-data Point  = Point { px :: Float,
-                      py :: Float } deriving (Show)
+type Coord = Float
+
+data Point  = Point { px :: Coord,
+                      py :: Coord } deriving (Show)
 
 p0 = Point 0.0 0.0
 
-data Vector = Vector { vx :: Float,
-     	      	       vy :: Float } deriving (Show)
+data Vector = Vector { vx :: Coord,
+     	      	       vy :: Coord } deriving (Show)
 
-v0 = Vector 0.0 0.0
+v0  = Vector 0.0 0.0
 v0x = Vector 1.0 0.0
 v0y = Vector 0.0 1.0
 
-data Radius = Radius Float deriving (Show)
+type Radius = Float
 
-radius2float :: Radius -> Float
-radius2float (Radius r) = r
-
-
-data Angle = Angle Float deriving (Show)
-angle2float :: Angle -> Float
-angle2float (Angle a) = a
+type Angle = Float
 
 data Circle = Circle { ccenter :: Point,
      	      	       cradius :: Radius } deriving (Show)
 
-c0 = Circle p0 (Radius 1.0)
+c0 = Circle p0 1.0
 
 data Side  = SideLeft | SideRight deriving (Enum,Show,Eq)
 
@@ -68,7 +64,7 @@ vector (Point x1 y1) (Point x2 y2) = Vector (x2-x1) (y2-y1)
 
 --- rotate a vector
 vrotate :: Vector -> Angle -> Vector
-vrotate (Vector x1 y1) (Angle a) 
+vrotate (Vector x1 y1) a
 	= Vector (x1 * cosa - y1 * sina) (x1 * sina + y1 * cosa )
 	where
 	   cosa = (cos a)
@@ -84,7 +80,7 @@ vscale (Vector x y) ratio
 
 --- check if 2 circles intersects
 cintersects :: Circle -> Circle -> Bool
-cintersects (Circle c1 (Radius r1)) (Circle c2 (Radius r2)) = vdist(vector c1 c2) - (r1 + r2) < (-0.0001 * (r1 + r1))
+cintersects (Circle c1 r1) (Circle c2 r2) = vdist(vector c1 c2) - (r1 + r2) < (-0.0001 * (r1 + r1))
 
 iscolliding :: [Circle] -> Circle -> Bool
 iscolliding [] _ = False
@@ -92,8 +88,8 @@ iscolliding (c:cs) newc = (cintersects c newc) || (iscolliding cs newc)
 
 --- compute a list of points from the circle
 circlePolygon :: Circle -> Polygon
-circlePolygon (Circle (Point x1 y1) (Radius r1)) = 
-	 Polygon [padd (Point x1 y1) (vrotate (Vector 0.0 r1) (Angle ((pi * 2.0) * (i / 100)))) | i <- [0..99]]
+circlePolygon (Circle (Point x1 y1) r1) = 
+	 Polygon [padd (Point x1 y1) (vrotate (Vector 0.0 r1) ((pi * 2.0) * (i / 100))) | i <- [0..99]]
 
 
 --- adj circle given radius and angle
@@ -105,11 +101,11 @@ circles2circle (Circle c1 r1) (Circle c2 r2) side radius = Circle newcenter radi
 		    vnew = vscale (vnorm (vrotate s3 angle) ) l2
 		    s3  = vector c2 c1
 		    l3  = vdist s3
-		    l1  = (radius2float r1) + (radius2float radius)
-		    l2  = (radius2float r2) + (radius2float radius)
+		    l1  = r1 + radius
+		    l2  = r2 + radius
 		    denom = 2.0 * l2 * l3
 		    cosv  = (l3 * l3 - l1 * l1 + l2 * l2) / denom
-		    angle = Angle (acos( cosv ) * (side2float side))
+		    angle = acos( cosv ) * (side2float side)
 
 
 --- bounding box

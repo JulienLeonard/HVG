@@ -19,3 +19,6 @@ geo :: Float -> Float -> Integer -> [Float]
 geo root ratio 0 = []
 geo root ratio nvalues = [root] ++ (geo (root*ratio) ratio (nvalues-1))
 
+symRange :: Float -> Range
+symRange ext = Range (-ext) ext
+
