@@ -32,7 +32,8 @@ main = do
      where 
          circlecolors = [((nodecircle node),(hue2color (nodehue maxrank node)))  | node <- newnodes]
 	 maxrank      = maximum $ map noderank newnodes
-	 newnodes     = seed0nodes ++ (circlepacking (Collider seed0nodes) rankseeds0 context0 (RatioRadius 0.9) fnewrank fnewcontext niter)
+	 newnodes     = seed0nodes ++ (circlepacking (Collider seed0nodes) rankseeds0 context0 fnewradius fnewrank fnewcontext niter)
+	 fnewradius   = fratioNewRadius (RatioRadius 0.9)
 	 context0     = context00 dummy0
 	 seed0nodes   = circlenodesfromseeds rankseeds0
 	 rankseeds0   = seeds0 rank0

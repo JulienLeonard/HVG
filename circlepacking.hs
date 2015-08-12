@@ -4,6 +4,7 @@ import Geoutils
 import CircleNode
 import Collider
 
+type Niter = Int
 
 --- Seed definition
 data CircleNodePair a = CircleNodePair {cnode1 :: CircleNode a,
@@ -53,17 +54,29 @@ ratioradius2float (RatioRadius ratio) = ratio
 ---- CirclePackingContext
 ---- Give global computation context to node creation, instead of parent ones
 
-data CirclePackingContext a = CirclePackingContext {contextniter   :: Int,
+data CirclePackingContext a = CirclePackingContext {contextniter   :: Niter,
                                                     contextcontent :: a}
 
 context00 a = CirclePackingContext 0 a
 
+--- generators methods
+type FNodeNewContent a b =  ([CircleNode a] -> (CirclePackingContext b) -> a)
+type FNodeNewRadius  a b =  ([CircleNode a] -> (CirclePackingContext b) -> Radius)
+
+fratioNewRadius :: RatioRadius -> [CircleNode a] -> (CirclePackingContext b) -> Radius
+fratioNewRadius ratio parentnodes _ = Radius (( radius2float r0) * (ratioradius2float ratio))
+	       where
+			r0 = noderadius $ parentnodes !! 0
+
 --- 
-seed2circlenodes :: Seed a -> CirclePackingContext b -> Radius -> ([CircleNode a] -> (CirclePackingContext b) -> a) -> CircleNode a
-seed2circlenodes (Seed (CircleNodePair (CircleNode c1 rank1 prevs1) (CircleNode c2 rank2 prevs2)) side) context radius fnewnodecontent = CircleNode newc (fnewnodecontent parentnodes context) parentnodes
+seed2circlenodes :: Seed a -> CirclePackingContext b -> (FNodeNewRadius a b) -> (FNodeNewContent a b) -> CircleNode a
+seed2circlenodes (Seed (CircleNodePair node1 node2) side) context fnewradius fnewnodecontent = newnode
 		 where
-			newc        = (circles2circle c1 c2 side radius)
-			parentnodes = [(CircleNode c1 rank1 prevs1),(CircleNode c2 rank2 prevs2)]
+		        newnode     = CircleNode newc newcontent parentnodes
+			newc        = (circles2circle (nodecircle node1) (nodecircle node2) side newradius)
+			newradius   = fnewradius      parentnodes context
+			newcontent  = fnewnodecontent parentnodes context
+			parentnodes = [node1,node2]
 			
 --- trimcollidings: 
 trimcollidings :: Collider a -> [CircleNode a] -> [CircleNode a]
@@ -73,21 +86,24 @@ trimcollidings collider (cnode:nodes) = newnodes ++ (trimcollidings newcollider 
 	           newcollider = collider_expand collider newnodes
 		   newnodes    = if (isnodecolliding collider cnode) then [] else [cnode]
 
+---
+type FNewContext b       =  (CirclePackingContext b -> CirclePackingContext b)
+
+
 --- simple packing
-circlepacking :: Collider a -> [Seed a] -> CirclePackingContext b -> RatioRadius -> ([CircleNode a] -> (CirclePackingContext b) -> a) -> (CirclePackingContext b -> CirclePackingContext b) -> Int -> [CircleNode a]
+circlepacking :: Collider a -> [Seed a] -> CirclePackingContext b -> (FNodeNewRadius a b) -> (FNodeNewContent a b) -> (FNewContext b) -> Niter -> [CircleNode a]
 circlepacking _ [] _ _ _ _ _ = []
 circlepacking _ _  _ _ _ _ 0 = []
-circlepacking collider (cseed:xseeds) context ratio fnewcontent fnewcontext niter = newnodes ++ (circlepacking newcollider newseeds newcontext ratio fnewcontent fnewcontext (niter - 1))
+circlepacking collider (cseed:xseeds) context fnewradius fnewcontent fnewcontext niter = newnodes ++ (circlepacking newcollider newseeds newcontext fnewradius fnewcontent fnewcontext (niter - 1))
 	      where
 	          newcollider  = collider_expand collider newnodes
 		  newcontext   = fnewcontext (CirclePackingContext ((contextniter context) + 1) (contextcontent context))
 		  newseeds     = (xseeds ++ createdseeds)
-	      	  createdseeds = circlenodepairs2seeds (concat [ [(CircleNodePair n0 newnode),(CircleNodePair n1 newnode)] | newnode <- newnodes]) allsides
-	          newnodes     = trimcollidings collider [(seed2circlenodes cseed context newradius fnewcontent)]
-		  newradius    = Radius (( radius2float r0) * (ratioradius2float ratio))
-		  r0           = cradius (nodecircle n0)
-		  n0           = cnode1 (seednodepair cseed)
-		  n1           = cnode2 (seednodepair cseed)
+	      	  createdseeds = circlenodepairs2seeds (concat [ [(CircleNodePair n1 newnode),(CircleNodePair n2 newnode)] | newnode <- newnodes]) allsides
+	          newnodes     = trimcollidings collider [(seed2circlenodes cseed context fnewradius fnewcontent)]
+		  newradius    = fnewradius  
+		  n1           = cnode1 (seednodepair cseed)
+		  n2           = cnode2 (seednodepair cseed)
 		  side         = seedside cseed
 
 

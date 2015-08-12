@@ -3,12 +3,16 @@ module CircleNode where
 import Geoutils
 
 --- CircleNode definition
-data CircleNode nodeContent = CircleNode {nodecircle :: Circle,
-			        nodecontent :: nodeContent,
-			        nodeprevs   :: [CircleNode nodeContent]} deriving (Show)
+data CircleNode a = CircleNode {nodecircle  :: Circle,
+			        nodecontent :: a,
+			        nodeseed    :: [CircleNode a]} deriving (Show)
 
-circle2circlenode :: Circle -> nodeContent -> CircleNode nodeContent
-circle2circlenode c a = CircleNode c a []
+noderadius = cradius . nodecircle
 
-nodescircles :: [CircleNode nodeContent] -> [Circle]
-nodescircles nodes = [nodecircle node | node <- nodes]
+circle2circlenode :: Circle -> a -> CircleNode a
+circle2circlenode c content = CircleNode c content []
+
+nodescircles :: [CircleNode a] -> [Circle]
+nodescircles nodes = map nodecircle nodes
+
+
