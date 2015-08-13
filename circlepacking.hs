@@ -91,6 +91,10 @@ type FNewSeeds a   = [Seed a] -> [Seed a] -> [Seed a]
 fappendnewseeds :: FNewSeeds a
 fappendnewseeds oldseeds newseeds = oldseeds ++ newseeds
 
+fprependnewseeds :: FNewSeeds a
+fprependnewseeds oldseeds newseeds = newseeds ++ oldseeds
+
+
 --- simple packing
 circlepacking :: Collider a -> [Seed a] -> CirclePackingContext b -> (FNodeNewRadius a b) -> (FNodeNewContent a b) -> (FNewContext b) -> (FNewSeeds a) -> Niter -> [CircleNode a]
 circlepacking _ [] _ _ _ _ _ _ = []
