@@ -32,12 +32,13 @@ fnewradius nodes context =  newradius
 main = do
      writeFile "reverseseeds.svg" $ svgCircleColors circlecolors
      where 
-         circlecolors     = [((nodecircle node),(hue2color (nodehue node))) | node <- newnodes]
-	 newnodes         = seed0nodes ++ (circlepacking (Collider seed0nodes) hueseeds0 context0 fnewradius fnewcontent fnewcontext fprependnewseeds niter)
-	 seed0nodes       = circlenodesfromseeds hueseeds0
-	 hueseeds0        = seeds00 0.0 0.0
-	 context0         = context00 (randincrhues,randratioradius)
-	 randratioradius  = take niter $ randomRs (0.0,1.0) (mkStdGen 0) :: [Float]
-	 randincrhues     = take niter $ randomRs (-0.1,0.1) (mkStdGen 1) :: [Float]
-	 niter            = 5000
+         circlecolors      = [((nodecircle node),(hue2color (nodehue node))) | node <- newnodes]
+	 newnodes          = seed0nodes ++ (circlepacking (Collider seed0nodes) hueseeds0 context0 circlepackingspec niter)
+	 seed0nodes        = circlenodesfromseeds hueseeds0
+	 hueseeds0         = seeds00 0.0 0.0
+	 context0          = context00 (randincrhues,randratioradius)
+	 randratioradius   = take niter $ randomRs (0.0,1.0) (mkStdGen 0) :: [Float]
+	 randincrhues      = take niter $ randomRs (-0.1,0.1) (mkStdGen 1) :: [Float]
+	 niter             = 5000
+	 circlepackingspec = CirclePackingSpec fnewradius fnewcontent fnewcontext fprependnewseeds
 	 

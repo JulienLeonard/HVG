@@ -95,11 +95,19 @@ fprependnewseeds :: FNewSeeds a
 fprependnewseeds oldseeds newseeds = newseeds ++ oldseeds
 
 
+data CirclePackingSpec a b = CirclePackingSpec {cpsfnewradius  :: FNodeNewRadius  a b,
+          	       	 		        cpsfnewcontent :: FNodeNewContent a b,
+                                                cpsfnewcontext :: FNewContext b,
+                                                cpsfnewseeds   :: FNewSeeds a}
+circlepackingspecs :: (CirclePackingSpec a b) -> (FNodeNewRadius  a b, FNodeNewContent a b, FNewContext b, FNewSeeds a)
+circlepackingspecs (CirclePackingSpec fnewradius fnewcontent fnewcontext fnewseeds) = (fnewradius,fnewcontent,fnewcontext,fnewseeds)
+
+
 --- simple packing
-circlepacking :: Collider a -> [Seed a] -> CirclePackingContext b -> (FNodeNewRadius a b) -> (FNodeNewContent a b) -> (FNewContext b) -> (FNewSeeds a) -> Niter -> [CircleNode a]
-circlepacking _ [] _ _ _ _ _ _ = []
-circlepacking _ _  _ _ _ _ _ 0 = []
-circlepacking collider (cseed:xseeds) context fnewradius fnewcontent fnewcontext fnewseeds niter = newnodes ++ (circlepacking newcollider newseeds newcontext fnewradius fnewcontent fnewcontext fnewseeds (niter - 1))
+circlepacking :: Collider a -> [Seed a] -> CirclePackingContext b -> (CirclePackingSpec a b) -> Niter -> [CircleNode a]
+circlepacking _ [] _ _ _ = []
+circlepacking _ _  _ _ 0 = []
+circlepacking collider (cseed:xseeds) context circlepackingspec niter = newnodes ++ (circlepacking newcollider newseeds newcontext circlepackingspec (niter - 1))
 	      where
 	          newcollider  = collider_expand collider newnodes
 		  newcontext   = fnewcontext (CirclePackingContext ((contextniter context) + 1) (contextcontent context))
@@ -110,5 +118,6 @@ circlepacking collider (cseed:xseeds) context fnewradius fnewcontent fnewcontext
 		  n1           = cnode1 (seednodepair cseed)
 		  n2           = cnode2 (seednodepair cseed)
 		  side         = seedside cseed
+		  (fnewradius,fnewcontent,fnewcontext,fnewseeds) = circlepackingspecs circlepackingspec
 
 
