@@ -33,7 +33,7 @@ main = do
      writeFile "circlepackingradius.svg" $ svgCircleColors circlecolors
      where 
          circlecolors     = [((nodecircle node),(hue2color (nodehue node))) | node <- newnodes]
-	 newnodes         = seed0nodes ++ (circlepacking (Collider seed0nodes) hueseeds0 context0 circlepackingspec niter)
+	 newnodes         = seed0nodes ++ (circlepacking (Collider seed0nodes) hueseeds0 context0 circlepackingspec 0.1 niter)
 	 seed0nodes       = circlenodesfromseeds hueseeds0
 	 hueseeds0        = seeds00 0.0 0.0
 	 context0         = context00 (randgenhue,randgenradius)

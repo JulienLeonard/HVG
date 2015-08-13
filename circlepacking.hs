@@ -77,12 +77,12 @@ seed2circlenodes (Seed (CircleNodePair node1 node2) side) context fnewradius fne
 			parentnodes = [node1,node2]
 			
 --- trimcollidings: 
-trimcollidings :: Collider a -> [CircleNode a] -> [CircleNode a]
-trimcollidings _ [] = []
-trimcollidings collider (cnode:nodes) = newnodes ++ (trimcollidings newcollider nodes)
+trimcollidings :: Collider a -> MinRadius -> [CircleNode a] -> [CircleNode a]
+trimcollidings _ _ [] = []
+trimcollidings collider minradius (cnode:nodes) = newnodes ++ (trimcollidings newcollider minradius nodes)
 	       where 
 	           newcollider = collider_expand collider newnodes
-		   newnodes    = if (isnodecolliding collider cnode) then [] else [cnode]
+		   newnodes    = if (noderadius cnode < minradius || isnodecolliding collider cnode) then [] else [cnode]
 
 ---
 type FNewContext b = (CirclePackingContext b -> CirclePackingContext b)
@@ -102,18 +102,20 @@ data CirclePackingSpec a b = CirclePackingSpec {cpsfnewradius  :: FNodeNewRadius
 circlepackingspecs :: (CirclePackingSpec a b) -> (FNodeNewRadius  a b, FNodeNewContent a b, FNewContext b, FNewSeeds a)
 circlepackingspecs (CirclePackingSpec fnewradius fnewcontent fnewcontext fnewseeds) = (fnewradius,fnewcontent,fnewcontext,fnewseeds)
 
+type MinRadius = Float
+
 
 --- simple packing
-circlepacking :: Collider a -> [Seed a] -> CirclePackingContext b -> (CirclePackingSpec a b) -> Niter -> [CircleNode a]
-circlepacking _ [] _ _ _ = []
-circlepacking _ _  _ _ 0 = []
-circlepacking collider (cseed:xseeds) context circlepackingspec niter = newnodes ++ (circlepacking newcollider newseeds newcontext circlepackingspec (niter - 1))
+circlepacking :: Collider a -> [Seed a] -> CirclePackingContext b -> (CirclePackingSpec a b) -> MinRadius -> Niter -> [CircleNode a]
+circlepacking _ [] _ _ _ _ = []
+circlepacking _ _  _ _ _ 0 = []
+circlepacking collider (cseed:xseeds) context circlepackingspec  minradius niter = newnodes ++ (circlepacking newcollider newseeds newcontext circlepackingspec  minradius (niter - 1))
 	      where
 	          newcollider  = collider_expand collider newnodes
 		  newcontext   = fnewcontext (CirclePackingContext ((contextniter context) + 1) (contextcontent context))
 		  newseeds     = fnewseeds xseeds createdseeds
 	      	  createdseeds = circlenodepairs2seeds (concat [ [(CircleNodePair n1 newnode),(CircleNodePair n2 newnode)] | newnode <- newnodes]) allsides
-	          newnodes     = trimcollidings collider [(seed2circlenodes cseed context fnewradius fnewcontent)]
+	          newnodes     = trimcollidings collider minradius [(seed2circlenodes cseed context fnewradius fnewcontent)]
 		  newradius    = fnewradius  
 		  n1           = cnode1 (seednodepair cseed)
 		  n2           = cnode2 (seednodepair cseed)
