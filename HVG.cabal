@@ -16,6 +16,11 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  -- exposed-modules:     
-  -- other-modules:       
-  build-depends:       base ==4.6.*
+  hs-source-dirs:   src
+  exposed-modules:  HVG
+  build-depends:    base ==4.6.*
+
+--test-suite Tests
+-- hs-source-dirs: test
+--  main-is: main_test.hs
+--  type: exitcode-stdio-1.0
