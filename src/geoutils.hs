@@ -10,7 +10,7 @@ data Point  = Point { px :: Coord,
 p0 = Point 0.0 0.0
 
 data Vector = Vector { vx :: Coord,
-     	      	       vy :: Coord } deriving (Show)
+     	      	       vy :: Coord } deriving (Eq,Show)
 
 v0  = Vector 0.0 0.0
 v0x = Vector 1.0 0.0
