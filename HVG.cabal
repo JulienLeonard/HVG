@@ -17,7 +17,7 @@ cabal-version:       >=1.8
 
 library
   hs-source-dirs:   src
-  exposed-modules:  HVG
+  exposed-modules:  HVG, Color, Render, Mathutils, Listutils, Geoutils, DrawUtils, CircleNode, CirclePacking, Collider
   build-depends:    base ==4.6.*
 
 --test-suite Tests
