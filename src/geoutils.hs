@@ -5,7 +5,7 @@ module Geoutils where
 type Coord = Float
 
 data Point  = Point { px :: Coord,
-                      py :: Coord } deriving (Show)
+                      py :: Coord } deriving (Eq,Show)
 
 p0 = Point 0.0 0.0
 
