@@ -35,7 +35,7 @@ data Polygon = Polygon {ppoints :: [Point]} deriving (Show)
 
 -- in the form of (Point xmin ymin) (Point xmax ymax)
 data BBox = BBox { bbpmin :: Point,
-                   bbpmax :: Point } deriving (Show)
+                   bbpmax :: Point } deriving (Show,Eq)
 
 -- Geometry utils
 
@@ -49,6 +49,10 @@ vdist (Vector x y) = sqrt (x*x + y*y)
 
 ---  add a point and a vector
 padd (Point x1 y1) (Vector x2 y2) = Point (x1+x2) (y1+y2)
+
+vadd (Vector x1 y1) (Vector x2 y2) = Vector (x1+x2) (y1+y2)
+
+vsub (Vector x1 y1) (Vector x2 y2) = Vector (x1-x2) (y1-y2)
 
 ---  normalized a vector
 vnorm :: Vector -> Vector
