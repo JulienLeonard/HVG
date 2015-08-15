@@ -1,6 +1,6 @@
 module Mathutils where
 
-data Range  = Range Float Float deriving (Show)
+data Range  = Range Float Float deriving (Show,Eq)
 
 rangeangle = Range 0.0 (2.0 * pi)
 
@@ -20,5 +20,5 @@ geo root ratio 0 = []
 geo root ratio nvalues = [root] ++ (geo (root*ratio) ratio (nvalues-1))
 
 symRange :: Float -> Range
-symRange ext = Range (-ext) ext
+symRange ext = (Range (-ext) ext)
 
